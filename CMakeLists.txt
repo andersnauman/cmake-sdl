@@ -1,6 +1,3 @@
-# Cross-compile:
-# cmake -DCMAKE_TOOLCHAIN_FILE=../ToolChain.cmake ..
-
 cmake_minimum_required(VERSION 3.14)
 
 include(GNUInstallDirs)
@@ -24,6 +21,13 @@ add_executable(${PROJECT_NAME} main.cpp)
 set(CMAKE_INSTALL_PREFIX "install") # temp
 
 # Dependencies
+## Vulkan
+find_package(Vulkan REQUIRED)
+if (Vulkan_FOUND)
+    target_include_directories(${PROJECT_NAME} PRIVATE ${Vulkan_INCLUDE_DIRS})
+    target_link_libraries(${PROJECT_NAME} ${Vulkan_LIBRARIES})
+endif()
+
 ## SDL2
 set(SDL_STATIC OFF CACHE INTERNAL "Build a static version of the library")
 add_subdirectory(external/SDL EXCLUDE_FROM_ALL)
@@ -45,8 +49,10 @@ endif()
 target_link_libraries(${PROJECT_NAME} SDL2)
 
 ## SDL2_image
-#get_property(SDL2_image_SDL2 TARGET SDL2 PROPERTY LINK_LIBRARIES)
-get_property(SDL2_image_SDL2 TARGET SDL2 PROPERTY INCLUDE_DIRECTORIES)
+# Get include directories so SDL_image can find sdl.h without having SDL installed globaly.
+get_property(SDL2_INCLUDE_DIRS TARGET SDL2 PROPERTY INCLUDE_DIRECTORIES)
+
+set(SDL_IMAGE_STATIC OFF CACHE INTERNAL "Build a static version of the library")
 add_subdirectory(external/SDL_image EXCLUDE_FROM_ALL)
 target_link_libraries(${PROJECT_NAME} SDL2_image)
 
