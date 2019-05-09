@@ -21,6 +21,13 @@ add_executable(${PROJECT_NAME} main.cpp)
 set(CMAKE_INSTALL_PREFIX "install") # temp
 
 # Dependencies
+## Vulkan
+find_package(Vulkan REQUIRED)
+if (Vulkan_FOUND)
+    target_include_directories(${PROJECT_NAME} PRIVATE ${Vulkan_INCLUDE_DIRS})
+    target_link_libraries(${PROJECT_NAME} ${Vulkan_LIBRARIES})
+endif()
+
 ## SDL2
 if (TARGET SDL2)
     message(AUTHOR_WARNING "TODO: Add support to find SDL2 through find_package()")
