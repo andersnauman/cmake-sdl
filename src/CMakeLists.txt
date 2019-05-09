@@ -29,7 +29,7 @@ if (Vulkan_FOUND)
 endif()
 
 ## SDL2
-if (TARGET SDL2)
+if (NOT TARGET SDL2)
     message(AUTHOR_WARNING "TODO: Add support to find SDL2 through find_package()")
     message(FATAL_ERROR "Could not find SDL2")
 endif()
@@ -51,11 +51,11 @@ endif()
 target_link_libraries(${PROJECT_NAME} SDL2)
 
 ## SDL2_image
-# Get include directories so SDL_image can find sdl.h without having SDL installed globaly.
-get_property(SDL2_INCLUDE_DIRS TARGET SDL2 PROPERTY INCLUDE_DIRECTORIES)
-
-set(SDL_IMAGE_STATIC OFF CACHE INTERNAL "Build a static version of the library")
-add_subdirectory(external/SDL_image EXCLUDE_FROM_ALL)
+if (NOT TARGET SDL2_image)
+    message(AUTHOR_WARNING "TODO: Add support to find SDL2_image through find_package()")
+    message(FATAL_ERROR "Could not find SDL2_image")
+endif()
+target_include_directories(${PROJECT_NAME} PRIVATE SDL2_image)
 target_link_libraries(${PROJECT_NAME} SDL2_image)
 
 # Install
