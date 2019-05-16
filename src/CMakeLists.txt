@@ -20,11 +20,13 @@ add_executable(${PROJECT_NAME} main.cpp)
 
 # Dependencies
 ## Vulkan
-if(NOT (TARGET Vulkan::Headers OR TARGET Vulkan::Vulkan))
-    message(AUTHOR_WARNING "TODO: Add support to find vulkan through find_package()")
-    message(FATAL_ERROR "Could not find Vulkan")
+if(NOT APPLE)
+    if(NOT (TARGET Vulkan::Headers AND TARGET Vulkan::Vulkan))
+        message(AUTHOR_WARNING "TODO: Add support to find vulkan through find_package()")
+        message(FATAL_ERROR "Could not find Vulkan")
+    endif()
+    target_link_libraries(${PROJECT_NAME} PRIVATE Vulkan::Headers)
 endif()
-target_link_libraries(${PROJECT_NAME} PRIVATE Vulkan::Headers)
 target_link_libraries(${PROJECT_NAME} PRIVATE Vulkan::Vulkan)
 
 ## SDL2
@@ -65,10 +67,18 @@ install(
         ${PROJECT_NAME}
         SDL2
         SDL2_image
-        vulkan
-        Vulkan-Headers
+        #vulkan
+        #Vulkan-Headers
     RUNTIME DESTINATION
         ${INSTALL_RUNTIME_DIR}
     LIBRARY DESTINATION
         ${INSTALL_LIBRARY_DIR}
 )
+if(APPLE)
+    install(
+        FILES
+            ${Vulkan_LIBRARIES}
+        DESTINATION
+            ${INSTALL_LIBRARY_DIR}
+    )
+endif()
