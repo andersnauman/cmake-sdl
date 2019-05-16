@@ -41,7 +41,7 @@ target_sources(${PROJECT_NAME} PRIVATE
 if(APPLE)
     target_sources(${PROJECT_NAME} PRIVATE 
         "${CMAKE_CURRENT_SOURCE_DIR}/IMG_ImageIO.m"
-        "${CMAKE_CURRENT_SOURCE_DIR}/IMG_UIImage.m"
+        #"${CMAKE_CURRENT_SOURCE_DIR}/IMG_UIImage.m" #'UIKit/UIKit.h' file not found
     )
 else()
     target_sources(${PROJECT_NAME} PRIVATE 
@@ -93,7 +93,7 @@ if(LOAD_PCX)
 endif()
 ## PNG
 if(LOAD_PNG)
-    if(MINGW)
+    if(MINGW AND CMAKE_CROSSCOMPILING)
         # To find ZLIB inside MinGW when you cross-compile, a better path needs to be added.
         set(ZLIB_ROOT "${CMAKE_FIND_ROOT_PATH}/sys-root/mingw" CACHE INTERNAL "FindZLIB.cmake tries this path if set")
     endif()
