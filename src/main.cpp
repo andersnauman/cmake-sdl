@@ -1,65 +1,48 @@
-#include <vector>
 #include <iostream>
 
-#include "SDL.h"
+#include "Core/Unique.hpp"
+#include "Core/Vulkan.hpp"
+#include "Core/Window.hpp"
+#include "Component/Graphic.hpp"
+#include "Component/PlayerControlled.hpp"
+#include "Component/Position.hpp"
+#include "Manager/Entity.hpp"
+#include "Manager/Component.hpp"
+#include "Manager/Resource/Texture.hpp"
+#include "System/Render.hpp"
 
-#include <vulkan/vulkan.h>
+int main() {
+    Core::Unique<Core::Window>::GetInstance().Initialize();
+    Core::Unique<Core::Vulkan>::GetInstance().SetInstanceExtensions(Core::Unique<Core::Window>::GetInstance().GetInstanceExtensions());
+    Core::Unique<Core::Vulkan>::GetInstance().Initialize();
 
-#ifdef __cplusplus
-extern "C"
-#endif
+    unsigned int id = Core::Unique<Manager::Entity>::GetInstance().Add();
+    printf("ID: %i\n", id);
+    Core::Unique<Manager::Component<Component::Position>>::GetInstance().Add(id);
+    Core::Unique<Manager::Component<Component::Graphic>>::GetInstance().Add(id);
+    Core::Unique<Manager::Component<Component::PlayerControlled>>::GetInstance().Add(id);
+    id = Core::Unique<Manager::Entity>::GetInstance().Add();
+    printf("ID: %i\n", id);
+    Core::Unique<Manager::Component<Component::Position>>::GetInstance().Add(id);
+    Core::Unique<Manager::Component<Component::Position>>::GetInstance().Get(id).Set(glm::vec3(0.0f, 0.0f, -20.0f));
+    Core::Unique<Manager::Component<Component::Graphic>>::GetInstance().Add(id);
+    //Core::Unique<Manager::Resource::Texture>::GetInstance().Load(Manager::Resource::Texture::Statue);
+    //sCore::Unique<Manager::Resource::Texture>::GetInstance().Load(Manager::Resource::Texture::Statue);
 
-int main(int argc, char *argv[]) {
-    SDL_Window *window;
-
-    SDL_Init(SDL_INIT_VIDEO);
-
-    window = SDL_CreateWindow("An SDL2 window", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 640, 480, SDL_WINDOW_VULKAN);
-
-    if (window == NULL) {
-        printf("Could not create window: %s\n", SDL_GetError());
-        return 1;
-    }
-
-    VkInstance instance;
-
-    VkApplicationInfo appInfo = {};
-    appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-    appInfo.pApplicationName = "Hello Triangle";
-    appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
-    appInfo.pEngineName = "No Engine";
-    appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
-    appInfo.apiVersion = VK_API_VERSION_1_0;
-
-    VkInstanceCreateInfo createInfo = {};
-    createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
-    createInfo.pApplicationInfo = &appInfo;
-
-    if (vkCreateInstance(&createInfo, nullptr, &instance) != VK_SUCCESS) {
-        throw std::runtime_error("failed to create instance!");
-    }
-    uint32_t gpu_count = 0;
-    vkEnumeratePhysicalDevices(instance, &gpu_count, nullptr);
-    std::vector<VkPhysicalDevice> gpu_list(gpu_count);
-    vkEnumeratePhysicalDevices(instance, &gpu_count, gpu_list.data());
-    VkPhysicalDeviceProperties prop;
-    vkGetPhysicalDeviceProperties(gpu_list[0], &prop);
-    printf("Graphics: %s\n", prop.deviceName);
-
-    uint32_t family_count = 0;
-    vkGetPhysicalDeviceQueueFamilyProperties(gpu_list[0], &family_count, nullptr);
-    std::vector<VkQueueFamilyProperties> family_list(family_count);
-    vkGetPhysicalDeviceQueueFamilyProperties(gpu_list[0], &family_count, family_list.data());
-
-    for(auto f : family_list) {
-        if(f.queueFlags & VK_QUEUE_GRAPHICS_BIT) {
-            printf("Found graphics!!\n");
+    // Main loop
+    while(!Core::Unique<Core::Window>::GetInstance().Done()) {
+        Core::Unique<Core::Window>::GetInstance().HandleEvents();
+        uint32_t image = Core::Unique<Core::Vulkan>::GetInstance().StartFrame();
+        if (image == UINT32_MAX) {
+            continue;
         }
+        //Core::Unique<Manager::Resource::Texture>::GetInstance().Update(image);
+        Core::Unique<System::Render>::GetInstance().Update();
+        Core::Unique<Core::Vulkan>::GetInstance().EndFrame();
     }
-
-    SDL_Delay(3000);
-
-    SDL_DestroyWindow(window);
-    SDL_Quit();
-    return 1;
+    Core::Unique<Manager::Resource::Texture>::GetInstance().UnloadAll();
+    Core::Unique<Manager::Component<Component::Graphic>>::GetInstance().Destroy();
+    Core::Unique<Core::Vulkan>::GetInstance().Destroy();
+    Core::Unique<Core::Window>::GetInstance().Destroy();
+    return 0;
 }

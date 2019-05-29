@@ -16,8 +16,24 @@ elseif (UNIX)
     set(CMAKE_INSTALL_RPATH "$ORIGIN/${LIBRARY_DIR}")
 endif()
 
-add_executable(${PROJECT_NAME} main.cpp)
-
+add_executable(${PROJECT_NAME}
+    main.cpp
+    #Component/Position.cpp
+    Component/PlayerControlled.cpp
+    Core/Vulkan.cpp
+    Core/Vulkan_debug.cpp
+    Core/Vulkan_utils.cpp
+    Core/Window.cpp
+    Manager/Resource/Texture.cpp
+    System/Render.cpp
+    System/Input.cpp
+)
+target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_17)
+target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+find_package(glm REQUIRED)
+if (glm_FOUND)
+    target_include_directories(${PROJECT_NAME} PRIVATE ${GLM_INCLUDE_DIRS})
+endif()
 # Dependencies
 ## Vulkan
 if(NOT APPLE)
