@@ -7,8 +7,8 @@ set(CMAKE_INSTALL_PREFIX "install") # temp
 # Apple need MoltenVK instead of Vulkan.
 if(APPLE)
     # export VULKAN_SDK="/Users/andersnauman/Downloads/vulkansdk-macos-1.1.97.0/macOS"
-    # export VK_LAYER_PATH="/Users/andersnauman/Downloads/vulkansdk-macos-1.1.97.0/macOS/etc/vulkan/explicit_layer.d"
-    # export VK_ICD_FILENAMES="/Users/andersnauman/Downloads/vulkansdk-macos-1.1.97.0/macOS/etc/vulkan/icd.d/MoltenVK_icd.json"
+    # export VK_LAYER_PATH="${VULKAN_SDK}/etc/vulkan/explicit_layer.d"
+    # export VK_ICD_FILENAMES="${VULKAN_SDK}/etc/vulkan/icd.d/MoltenVK_icd.json"
     find_package(Vulkan REQUIRED)
 else()
     add_subdirectory(external/Vulkan-Headers EXCLUDE_FROM_ALL)

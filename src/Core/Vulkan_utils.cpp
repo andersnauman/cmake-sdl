@@ -322,8 +322,9 @@ void Vulkan::CreateImage(uint32_t width, uint32_t height, VkSampleCountFlagBits 
     if (vkAllocateMemory(device_, &allocInfo, nullptr, &imageMemory) != VK_SUCCESS) {
         throw std::runtime_error("failed to allocate image memory!");
     }
-
-    vkBindImageMemory(device_, image, imageMemory, 0);
+    if (vkBindImageMemory(device_, image, imageMemory, 0) != VK_SUCCESS) {
+        throw std::runtime_error("failed to bind image memory!");
+    }
 }
 
 bool Vulkan::HasStencilComponent(VkFormat format) {
@@ -500,12 +501,12 @@ void Vulkan::DestroyBufferArray(std::vector<VkBuffer>& buffer, std::vector<VkDev
         vkFreeMemory(device_, bufferMemory[i], nullptr);
     }
 }
-
-void Vulkan::DestroyTexture(std::shared_ptr<Object>& texture) {
+void Vulkan::DestroyTexture(VkImage& image, VkDeviceMemory& imageMemory, VkImageView& imageView, VkSampler& imageSampler) {
+//void Vulkan::DestroyTexture(std::shared_ptr<Object>& texture) {
     vkDeviceWaitIdle(device_);
-    vkDestroySampler(device_, texture->imageSampler, nullptr);
-    vkDestroyImageView(device_, texture->imageView, nullptr);
-    vkDestroyImage(device_, texture->image, nullptr);
-    vkFreeMemory(device_, texture->imageMemory, nullptr);
+    vkDestroySampler(device_, imageSampler, nullptr);
+    vkDestroyImageView(device_, imageView, nullptr);
+    vkDestroyImage(device_, image, nullptr);
+    vkFreeMemory(device_, imageMemory, nullptr);
 }
 }

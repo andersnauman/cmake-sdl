@@ -7,28 +7,16 @@
 namespace Component {
 class Position {
     public:
-        void SetOwner(unsigned int entityId) {
-            entity_id_ = entityId;
-        };
+        Position() {};
+        ~Position() {};
+        void SetOwner(unsigned int entityId);
+        unsigned int GetOwner();
+        void Reset();
+        void Initialize();
+        void Update() {};
 
-        unsigned int GetOwner() {
-            return entity_id_;
-        };
-
-        void Reset() {};
-        void Initialize() {
-            //pos_ = glm::vec3(-1.5f, -1.5f, 1.0f);
-            pos_ = glm::vec3(0.0f, 0.0f, 0.0f);
-        };
-
-        void Set(glm::vec3 newPos) {
-            pos_ = newPos;
-        };
-
-        glm::vec3 Get() {
-            return pos_;
-        }
-
+        void Set(glm::vec3 newPos);
+        glm::vec3 Get();
         void Move(glm::vec3 move);
 
     private:

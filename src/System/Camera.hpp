@@ -3,6 +3,7 @@
 
 // Global non-standard headers
 #define GLM_FORCE_RADIANS
+#define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -16,9 +17,7 @@ class Camera {
             glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f,  -1.0f);
             glm::vec3 cameraUp    = glm::vec3(0.0f, 1.0f,  0.0f);
             view_ = glm::lookAt(cameraPos, cameraFront, cameraUp);
-            //view_ = glm::lookAt(glm::vec3(10.0f, 10.0f, 10.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
             project_ = glm::perspective(fov_, aspect_, near_, far_);
-            //project_ = glm::ortho(-400.0f, 400.0f, 300.0f, -300.0f, near_, far_);
             project_[1][1] *= -1;
         };
         void SetViewPosition(glm::vec3 pos);

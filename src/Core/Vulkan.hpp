@@ -36,6 +36,10 @@ class Vulkan {
             glm::mat4 view;
             glm::mat4 proj;
         };
+        struct Coords {
+            glm::vec3 vertex;
+            glm::vec2 texCoords;
+        };
         struct Vertex {
             glm::vec3 pos;
             glm::vec3 color;
@@ -74,12 +78,6 @@ class Vulkan {
                 {{+1.0f, +0.0f, 0.0f}, {1.0f, 0.0f, 1.0f}},
                 {{+0.0f, +1.0f, 0.0f}, {1.0f, 1.0f, 1.0f}},
                 {{+0.0f, +0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}},
-/*                
-                {{-0.5f, -0.5f, +0.0f}, {+1.0f, +0.0f, +0.0f}, {+1.0f, +0.0f}},
-                {{+0.5f, -0.5f, +0.0f}, {+0.0f, +1.0f, +0.0f}, {+0.0f, +0.0f}},
-                {{+0.5f, +0.5f, +0.0f}, {+0.0f, +0.0f, +1.0f}, {+0.0f, +1.0f}},
-                {{-0.5f, +0.5f, +0.0f}, {+1.0f, +1.0f, +1.0f}, {+1.0f, +1.0f}},
-*/
             };
             std::vector<uint16_t> indices_ = {{
                 0, 6, 4, 6, 0, 5
@@ -107,7 +105,7 @@ class Vulkan {
         // Vulkan.cpp
         void Initialize();
         void Destroy();
-        void CreateVertexBuffer(std::vector<Vertex> vertices, VkBuffer& vb, VkDeviceMemory& vbm);
+        void CreateVertexBuffer(std::vector<Coords> vertices, VkBuffer& vb, VkDeviceMemory& vbm);
         void CreateIndexBuffer(std::vector<uint16_t> indices, VkBuffer& ib, VkDeviceMemory& ibm);
         /*void CreateUniformBuffers(std::vector<VkBuffer>& ub, std::vector<VkDeviceMemory>& ubm);
         void CreateTextureImage(std::shared_ptr<Manager::Resource::Texture::Object>& texture);
@@ -117,14 +115,18 @@ class Vulkan {
         //void CreateVertexBuffer();
         //void CreateIndexBuffer();
         void CreateUniformBuffers(std::vector<VkBuffer>& mvp, std::vector<VkDeviceMemory>& mvpMemory);
-        void UpdateUniformBuffer(std::shared_ptr<Object>& obj, UniformBufferObject mvp);
+        void UpdateUniformBuffer(UniformBufferObject mvp, std::vector<VkDeviceMemory>& mvpBufferMemory);
         void CreateDescriptorPool();
-        void CreateDescriptorSets(std::shared_ptr<Object>& obj);
-        void CreateTextureImage(std::shared_ptr<Object>& texture);
-        void CreateTextureSampler(VkSampler& s);
+        //void CreateDescriptorSets(std::shared_ptr<Object>& obj);
+        void CreateDescriptorSets(std::vector<VkDescriptorSet>& ds, std::vector<VkBuffer>& mvpBuffer, VkImageView& imageView, VkSampler& imageSampler);
+        //void CreateTextureImage(std::shared_ptr<Object>& texture);
+        void CreateTextureImage(VkImage& image, VkDeviceMemory& imageMemory, std::shared_ptr<void> pixels, VkDeviceSize size, int height, int width);
+        void CreateTextureImageView(VkImage& image, VkImageView& imageView);
+        void CreateTextureSampler(VkSampler& imageSampler);
         void CreateCommandBuffers(bool init); // temp
         void StartSecondaryCommandBuffer(uint32_t size);
-        void AddToSecondaryCommandBuffer(std::shared_ptr<Object>& obj, unsigned int i);
+        //void AddToSecondaryCommandBuffer(std::shared_ptr<Object>& obj, unsigned int i);
+        void AddToSecondaryCommandBuffer(VkBuffer vb, VkBuffer ib, uint32_t iSize, std::vector<VkDescriptorSet>& ds, unsigned int objCount);
         void EndSecondaryCommandBuffer();
         //void CreateSecondaryCommandBuffer(std::vector<Component::Graphic> obj);
 
@@ -150,7 +152,8 @@ class Vulkan {
         void SetWindowSize(uint32_t width, uint32_t height);
         void DestroyBuffer(VkBuffer& buffer, VkDeviceMemory& bufferMemory);
         void DestroyBufferArray(std::vector<VkBuffer>& buffer, std::vector<VkDeviceMemory>& bufferMemory);
-        void DestroyTexture(std::shared_ptr<Object>& texture);
+        //void DestroyTexture(std::shared_ptr<Object>& texture);
+        void DestroyTexture(VkImage& image, VkDeviceMemory& imageMemory, VkImageView& imageView, VkSampler& imageSampler);
 
     private:
         // Structs
@@ -191,6 +194,8 @@ class Vulkan {
         void CreateRenderPass();
         void CreateDescriptorSetLayout();
         void CreateGraphicsPipeline();
+        void CreateColorResources();
+        void CreateDepthResources();
         void CreateFramebuffers();
         void CreateSyncObjects();
         void CreateCommandPool();
@@ -256,6 +261,14 @@ class Vulkan {
         // Pipeline
         VkPipelineLayout pipelineLayout_;
         VkPipeline graphicsPipeline_;
+        // Depth
+        VkImage depthImage;
+        VkDeviceMemory depthImageMemory;
+        VkImageView depthImageView;
+        // MSAA
+        VkImage colorImage_;
+        VkDeviceMemory colorImageMemory_;
+        VkImageView colorImageView_;
         // Sync
         std::vector<VkSemaphore> imageAvailableSemaphores_;
         std::vector<VkSemaphore> renderFinishedSemaphores_;

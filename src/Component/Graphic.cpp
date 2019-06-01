@@ -7,6 +7,7 @@
 
 #include "Core/Unique.hpp"
 #include "Core/Vulkan.hpp"
+#include "Manager/Resource/Texture.hpp"
 
 #include "Graphic.hpp"
 
@@ -17,22 +18,18 @@ void Graphic::SetOwner(unsigned int entityId) {
 unsigned int Graphic::GetOwner() {
     return entity_id_;
 };
-std::shared_ptr<Core::Vulkan::Object>& Graphic::Get() {
+std::shared_ptr<Manager::Resource::Texture::Object>& Graphic::Get() {
     return obj_;
 };
 void Graphic::Reset() {
-    Core::Unique<Core::Vulkan>::GetInstance().DestroyBufferArray(obj_->mvp, obj_->mvpMemory);
-    Core::Unique<Core::Vulkan>::GetInstance().DestroyBuffer(obj_->index, obj_->indexMemory);
-    Core::Unique<Core::Vulkan>::GetInstance().DestroyBuffer(obj_->vertex, obj_->vertexMemory);
+    Core::Unique<Core::Vulkan>::GetInstance().DestroyBufferArray(mvpBuffer_, mvpBufferMemory_);
 };
 void Graphic::Initialize() {
-    obj_ = std::make_shared<Core::Vulkan::Object>();
-    for (auto &vert : obj_->vertices_) {
-        vert.pos *= glm::vec3(10.0f, 10.0f, 32.0f);
-    }
-    Core::Unique<Core::Vulkan>::GetInstance().CreateVertexBuffer(obj_->vertices_, obj_->vertex, obj_->vertexMemory);
-    Core::Unique<Core::Vulkan>::GetInstance().CreateIndexBuffer(obj_->indices_, obj_->index, obj_->indexMemory);
-    Core::Unique<Core::Vulkan>::GetInstance().CreateUniformBuffers(obj_->mvp, obj_->mvpMemory);
-    Core::Unique<Core::Vulkan>::GetInstance().CreateDescriptorSets(obj_);
+    Core::Unique<Manager::Resource::Texture>::GetInstance().Load(Manager::Resource::Texture::Statue);
+    obj_ = Core::Unique<Manager::Resource::Texture>::GetInstance().Get(Manager::Resource::Texture::Statue);
+    
+    Core::Vulkan& vulkan = Core::Unique<Core::Vulkan>::GetInstance();
+    vulkan.CreateUniformBuffers(mvpBuffer_, mvpBufferMemory_);
+    vulkan.CreateDescriptorSets(descriptorSets_, mvpBuffer_, obj_->imageView_, obj_->imageSampler_);
 };
 };

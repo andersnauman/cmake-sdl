@@ -18,7 +18,8 @@ endif()
 
 add_executable(${PROJECT_NAME}
     main.cpp
-    #Component/Position.cpp
+    Component/Graphic.cpp
+    Component/Position.cpp
     Component/PlayerControlled.cpp
     Core/Vulkan.cpp
     Core/Vulkan_debug.cpp

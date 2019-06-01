@@ -2,29 +2,32 @@
 #define COMPONENT_PLAYERCONTROLLED_H_
 
 #include <cstdint>
+#include <map>
 
 namespace Component {
 class PlayerControlled {
     public:
         enum Action {
+            up,
+            down,
             left,
-            right
+            right,
+            fire,
+            none,
         };
         PlayerControlled() {};
         ~PlayerControlled() {};
-        void SetOwner(unsigned int entityId) {
-            entity_id_ = entityId;
-        };
-        unsigned int GetOwner() {
-            return entity_id_;
-        };
-        void Reset() {};
-        void Initialize() {};
+        void SetOwner(unsigned int entityId);
+        unsigned int GetOwner();
+        void Reset();
+        void Initialize();
+        void Update() {};
+
         Action GetAction(uint16_t scancode);
 
     private:
         unsigned long entity_id_;
-        
+        std::map<uint16_t, Action> keyMap; 
 };
 };
 

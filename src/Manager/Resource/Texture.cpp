@@ -1,5 +1,18 @@
-#include <iostream>
+#include <cstdint>
+#include <map>
+#include <memory>
+#include <vector>
 
+// Global non-standard headers
+#ifdef __APPLE__
+#include <SDL_image.h>
+#endif // __APPLE__
+
+#ifdef __LINUX__
+#include <SDL2/SDL_image.h>
+#endif // __LINUX__
+
+// Local headers
 #include "Core/Unique.hpp"
 #include "Core/Vulkan.hpp"
 
@@ -15,7 +28,7 @@ void Texture::Load(ObjectID id) {
     std::string path;
     switch (id) {
         case Statue:
-            path = "../Resource/Texture/statue.png";
+            path = "../src/Resource/Texture/statue.png";
             break;
     };
 
@@ -24,7 +37,7 @@ void Texture::Load(ObjectID id) {
         throw std::runtime_error("Could not load image");
     }
 
-    std::shared_ptr<Core::Vulkan::Object> obj(new Core::Vulkan::Object);
+    std::shared_ptr<Object> obj(new Object);
     obj->data.h = surface->h;
     obj->data.w = surface->w;
     obj->data.size = surface->h * surface->w * 4; // 4 == rgba aka 4byte
@@ -32,31 +45,42 @@ void Texture::Load(ObjectID id) {
     std::memcpy(obj->data.pixels.get(), surface->pixels, obj->data.size);
     SDL_FreeSurface(surface);
 
+    // inPosition and attributeDescriptions in shader
+    std::vector<Core::Vulkan::Coords> vertices = {
+        {{+16.0f, +16.0f, 0.0f},{0.0f, 0.0f}},
+        {{-16.0f, -16.0f, 0.0f},{1.0f, 0.0f}}, // none
+        {{+16.0f, -16.0f, 0.0f},{1.0f, 0.0f}}, // none
+        {{-16.0f, +16.0f, 0.0f},{1.0f, 0.0f}}, // none
+        {{+16.0f, +0.0f, 0.0f},{0.0f, 1.0f}},
+        {{+0.0f, +16.0f, 0.0f},{1.0f, 0.0f}},
+        {{+0.0f, +0.0f, 0.0f},{1.0f, 1.0f}},
+    };    
+    std::vector<uint16_t> indices = {{
+        0, 6, 4, 6, 0, 5
+    }};
+    obj->vertices_ = vertices;
+    obj->indices_ = indices;
     // Vulkan objects
-    // CreateShaderInfoBuffer()?
-    //Core::Unique<Core::Vulkan>::GetInstance().CreateVertexBuffer(obj->vertices_, obj->vertex, obj->vertexMemory);
-    //Core::Unique<Core::Vulkan>::GetInstance().CreateIndexBuffer(obj->indices_, obj->index, obj->indexMemory);
-    /*
-    Core::Unique<Core::Vulkan>::GetInstance().CreateTextureImage(obj);
-    Core::Unique<Core::Vulkan>::GetInstance().CreateTextureSampler(obj->imageSampler);
-    */
-    //Core::Unique<Core::Vulkan>::GetInstance().CreateUniformBuffers(obj->mvp, obj->mvpMemory);
-    //Core::Unique<Core::Vulkan>::GetInstance().CreateDescriptorSets(obj);
-    //Core::Unique<Core::Vulkan>::GetInstance().CreateSecondaryCommandBuffer(obj);
-    //Core::Unique<Core::Vulkan>::GetInstance().CreateCommandBuffers(obj);
-    
+    Core::Vulkan& vulkan = Core::Unique<Core::Vulkan>::GetInstance();
+
+    vulkan.CreateVertexBuffer(obj->vertices_, obj->vertexBuffer_, obj->vertexBufferMemory_);
+    vulkan.CreateIndexBuffer(obj->indices_, obj->indexBuffer_, obj->indexBufferMemory_);
+    vulkan.CreateTextureImage(obj->image_, obj->imageMemory_, obj->data.pixels, obj->data.size, obj->data.h, obj->data.w);
+    vulkan.CreateTextureImageView(obj->image_, obj->imageView_);
+    vulkan.CreateTextureSampler(obj->imageSampler_);
+    //loadedObjects_.insert(std::pair<ObjectID, std::shared_ptr<Object>>(id, obj));
+    loadedObjects_.insert({id, obj});
     printf("Image loaded!\n");
-    loadedObjects_.insert(std::pair<ObjectID, std::shared_ptr<Core::Vulkan::Object>>(id, obj));
 };
 
 void Texture::Unload(ObjectID id) {
     printf("Unloading %i\n", id);
-    //std::shared_ptr<Core::Vulkan::Object>& obj = Get(id);
-    //Core::Unique<Core::Vulkan>::GetInstance().DestroyTexture(obj);
-    //Core::Unique<Core::Vulkan>::GetInstance().DestroyBuffer(obj->vertex, obj->vertexMemory);
-    //Core::Unique<Core::Vulkan>::GetInstance().DestroyBuffer(obj->index, obj->indexMemory);
-    //Core::Unique<Core::Vulkan>::GetInstance().DestroyBufferArray(obj->mvp, obj->mvpMemory);
-    // Do not need to cleanup descriptor-set. They will be destroyed when the pool get destroyed.
+    //std::shared_ptr<Object> obj = Get(id);
+    std::shared_ptr<Object> obj = loadedObjects_.at(id);
+    Core::Vulkan& vulkan = Core::Unique<Core::Vulkan>::GetInstance();
+    vulkan.DestroyTexture(obj->image_, obj->imageMemory_, obj->imageView_, obj->imageSampler_);
+    vulkan.DestroyBuffer(obj->vertexBuffer_, obj->vertexBufferMemory_);
+    vulkan.DestroyBuffer(obj->indexBuffer_, obj->indexBufferMemory_);
 };
 
 void Texture::UnloadAll() {
@@ -67,12 +91,10 @@ void Texture::UnloadAll() {
 };
 
 void Texture::Update(uint32_t imageIndex) {
-    for (auto& obj : loadedObjects_) {
-        //Core::Unique<Core::Vulkan>::GetInstance().UpdateUniformBuffer(obj.second, imageIndex);
-    }
+    //for (auto& obj : loadedObjects_) {}
 };
 
-std::shared_ptr<Core::Vulkan::Object>& Texture::Get(ObjectID id) {
+std::shared_ptr<Texture::Object> Texture::Get(ObjectID id) {
     try {
         return loadedObjects_.at(id);
     } catch (std::out_of_range& e) {
