@@ -16,6 +16,7 @@ layout(location = 1) out vec2 fragTexCoord;
 
 void main() {
     gl_Position = ubo.proj * ubo.view * ubo.model * vec4(inPosition, 1.0);
+    gl_Position.y = -gl_Position.y; // Compensate for Vulkans new clip-space
     //fragColor = inColor;
     fragColor = vec3(0.5, 0.5, 0.5);
     fragTexCoord = inTexCoord;

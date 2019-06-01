@@ -182,6 +182,7 @@ void Vulkan::CreateLogicalDevice() {
 
     VkPhysicalDeviceFeatures deviceFeatures = {};
     deviceFeatures.sampleRateShading = VK_TRUE;
+    deviceFeatures.samplerAnisotropy = VK_TRUE;
 
     VkDeviceCreateInfo createInfo = {};
     createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;

@@ -44,7 +44,7 @@ void Texture::Load(ObjectID id) {
     obj->data.pixels.reset(std::malloc(obj->data.size), std::free);
     std::memcpy(obj->data.pixels.get(), surface->pixels, obj->data.size);
     SDL_FreeSurface(surface);
-
+/*
     // inPosition and attributeDescriptions in shader
     std::vector<Core::Vulkan::Coords> vertices = {
         {{+16.0f, +16.0f, 0.0f},{0.0f, 0.0f}},
@@ -58,6 +58,17 @@ void Texture::Load(ObjectID id) {
     std::vector<uint16_t> indices = {{
         0, 6, 4, 6, 0, 5
     }};
+    */
+   std::vector<Core::Vulkan::Coords> vertices = {
+    {{-16.0f, -16.0f, 0.0f}, {0.0f, 1.0f}},
+    {{+16.0f, -16.0f, 0.0f}, {1.0f, 1.0f}},
+    {{+16.0f, +16.0f, 0.0f}, {1.0f, 0.0f}},
+    {{-16.0f, +16.0f, 0.0f}, {0.0f, 0.0f}}
+    };
+    std::vector<uint16_t> indices = {{
+        0, 1, 2, 2, 3, 0
+    }};
+
     obj->vertices_ = vertices;
     obj->indices_ = indices;
     // Vulkan objects

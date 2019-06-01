@@ -29,7 +29,6 @@ int main() {
     id = Core::Unique<Manager::Entity>::GetInstance().Add();
     Core::Unique<Manager::Component<Component::Position>>::GetInstance().Add(id);
     Core::Unique<Manager::Component<Component::Graphic>>::GetInstance().Add(id);
-    //Core::Unique<Manager::Resource::Texture>::GetInstance().Load(Manager::Resource::Texture::Statue);
 
     // Main loop
     while(!Core::Unique<Core::Window>::GetInstance().Done()) {
@@ -38,7 +37,6 @@ int main() {
         if (image == UINT32_MAX) {
             continue;
         }
-        //Core::Unique<Manager::Resource::Texture>::GetInstance().Update(image);
         Core::Unique<System::Input>::GetInstance().Update();
         Core::Unique<System::Render>::GetInstance().Update();
         Core::Unique<Core::Vulkan>::GetInstance().EndFrame();
