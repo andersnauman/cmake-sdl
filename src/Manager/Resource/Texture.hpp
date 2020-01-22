@@ -12,7 +12,8 @@
 
 #include <Core/Vulkan.hpp>
 
-namespace Manager::Resource {
+namespace Manager {
+namespace Resource {
 class Texture {
     public:    
         struct Object {
@@ -44,6 +45,7 @@ class Texture {
         std::shared_ptr<Object> Get(ObjectID id);
     private:
         std::map<ObjectID, std::shared_ptr<Object>> loadedObjects_;
+};
 };
 };
 

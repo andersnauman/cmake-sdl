@@ -21,6 +21,7 @@ class Render {
         void Update();
         
     private:
+
 };
 };
 #endif // SYSTEM_RENDER_H_

@@ -19,12 +19,8 @@
 namespace Core {
 class Window {
     public:
-        Window() {
-            printf("Created window\n");
-        };
-        ~Window() {
-            printf("Ending window\n");
-        };
+        Window() {};
+        ~Window() {};
 
         void Initialize();
         void Destroy();

@@ -18,10 +18,10 @@
 
 #include "Texture.hpp"
 
-namespace Manager::Resource {
+namespace Manager {
+namespace Resource {
 void Texture::Load(ObjectID id) {
     if (loadedObjects_.find(id) != loadedObjects_.end()) {
-        printf("Texture is already loaded\n");
         return;
     }
     // Image data
@@ -44,26 +44,12 @@ void Texture::Load(ObjectID id) {
     obj->data.pixels.reset(std::malloc(obj->data.size), std::free);
     std::memcpy(obj->data.pixels.get(), surface->pixels, obj->data.size);
     SDL_FreeSurface(surface);
-/*
-    // inPosition and attributeDescriptions in shader
+
     std::vector<Core::Vulkan::Coords> vertices = {
-        {{+16.0f, +16.0f, 0.0f},{0.0f, 0.0f}},
-        {{-16.0f, -16.0f, 0.0f},{1.0f, 0.0f}}, // none
-        {{+16.0f, -16.0f, 0.0f},{1.0f, 0.0f}}, // none
-        {{-16.0f, +16.0f, 0.0f},{1.0f, 0.0f}}, // none
-        {{+16.0f, +0.0f, 0.0f},{0.0f, 1.0f}},
-        {{+0.0f, +16.0f, 0.0f},{1.0f, 0.0f}},
-        {{+0.0f, +0.0f, 0.0f},{1.0f, 1.0f}},
-    };    
-    std::vector<uint16_t> indices = {{
-        0, 6, 4, 6, 0, 5
-    }};
-    */
-   std::vector<Core::Vulkan::Coords> vertices = {
-    {{-16.0f, -16.0f, 0.0f}, {0.0f, 1.0f}},
-    {{+16.0f, -16.0f, 0.0f}, {1.0f, 1.0f}},
-    {{+16.0f, +16.0f, 0.0f}, {1.0f, 0.0f}},
-    {{-16.0f, +16.0f, 0.0f}, {0.0f, 0.0f}}
+        {{-16.0f, -16.0f, 0.0f}, {0.0f, 1.0f}},
+        {{+16.0f, -16.0f, 0.0f}, {1.0f, 1.0f}},
+        {{+16.0f, +16.0f, 0.0f}, {1.0f, 0.0f}},
+        {{-16.0f, +16.0f, 0.0f}, {0.0f, 0.0f}},
     };
     std::vector<uint16_t> indices = {{
         0, 1, 2, 2, 3, 0
@@ -71,6 +57,7 @@ void Texture::Load(ObjectID id) {
 
     obj->vertices_ = vertices;
     obj->indices_ = indices;
+
     // Vulkan objects
     Core::Vulkan& vulkan = Core::Unique<Core::Vulkan>::GetInstance();
 
@@ -79,15 +66,11 @@ void Texture::Load(ObjectID id) {
     vulkan.CreateTextureImage(obj->image_, obj->imageMemory_, obj->data.pixels, obj->data.size, obj->data.h, obj->data.w);
     vulkan.CreateTextureImageView(obj->image_, obj->imageView_);
     vulkan.CreateTextureSampler(obj->imageSampler_);
-    //loadedObjects_.insert(std::pair<ObjectID, std::shared_ptr<Object>>(id, obj));
     loadedObjects_.insert({id, obj});
-    printf("Image loaded!\n");
 };
 
 void Texture::Unload(ObjectID id) {
-    printf("Unloading %i\n", id);
-    //std::shared_ptr<Object> obj = Get(id);
-    std::shared_ptr<Object> obj = loadedObjects_.at(id);
+    std::shared_ptr<Object> obj = Get(id);
     Core::Vulkan& vulkan = Core::Unique<Core::Vulkan>::GetInstance();
     vulkan.DestroyTexture(obj->image_, obj->imageMemory_, obj->imageView_, obj->imageSampler_);
     vulkan.DestroyBuffer(obj->vertexBuffer_, obj->vertexBufferMemory_);
@@ -111,5 +94,6 @@ std::shared_ptr<Texture::Object> Texture::Get(ObjectID id) {
     } catch (std::out_of_range& e) {
         throw std::runtime_error("Texture object is not loaded");
     }
+};
 };
 };

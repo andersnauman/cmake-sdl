@@ -13,7 +13,6 @@ void Render::Update() {
     Core::Unique<Manager::Component<Component::Graphic>>::GetInstance().GetAllActive(a);
     Core::Vulkan& vulkan = Core::Unique<Core::Vulkan>::GetInstance();
     vulkan.StartSecondaryCommandBuffer((uint32_t) a.size());
-
     for (unsigned int i = 0; i < (uint32_t) a.size(); i++) {
         auto & graphic = a.at(i);
         std::shared_ptr<Manager::Resource::Texture::Object>& texture = graphic.Get();
