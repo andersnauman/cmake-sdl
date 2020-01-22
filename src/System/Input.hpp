@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include <map>
+#include <vector>
 
 // Global non-standard headers
 #define GLM_FORCE_RADIANS
@@ -20,7 +21,15 @@ class Input {
         void SetKeyboardEvent(uint16_t scancode, uint8_t state, uint8_t repeat);
         void SetMouseEvent(uint8_t button, uint8_t state, uint8_t clicks, glm::vec2 pos);
     private:
+        struct MouseEvent {
+            glm::vec2 pos;
+            bool repeat;
+            uint8_t type;
+        };
         std::map<uint16_t, bool> keyPressed;
+        std::map<uint8_t, MouseEvent> mousePressed;
+
+        std::vector<MouseEvent> eventQueue_;
 
 };
 };

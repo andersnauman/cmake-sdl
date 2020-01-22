@@ -13,9 +13,6 @@
 #include <glm/glm.hpp>
 #include <vulkan/vulkan.hpp>
 
-//#include "Component/Graphic.hpp"
-//#include "Manager/Resource/Texture.hpp"
-
 namespace Core {
 class Vulkan {
     public:
@@ -40,65 +37,7 @@ class Vulkan {
             glm::vec3 vertex;
             glm::vec2 texCoords;
         };
-        struct Vertex {
-            glm::vec3 pos;
-            glm::vec3 color;
 
-            static VkVertexInputBindingDescription getBindingDescription() {
-                VkVertexInputBindingDescription bindingDescription = {};
-                bindingDescription.binding = 0;
-                bindingDescription.stride = sizeof(Vertex);
-                bindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
-
-                return bindingDescription;
-            }
-
-            static std::array<VkVertexInputAttributeDescription, 2> getAttributeDescriptions() {
-                std::array<VkVertexInputAttributeDescription, 2> attributeDescriptions = {};
-
-                attributeDescriptions[0].binding = 0;
-                attributeDescriptions[0].location = 0;
-                attributeDescriptions[0].format = VK_FORMAT_R32G32B32_SFLOAT;
-                attributeDescriptions[0].offset = offsetof(Vertex, pos);
-
-                attributeDescriptions[1].binding = 0;
-                attributeDescriptions[1].location = 1;
-                attributeDescriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;
-                attributeDescriptions[1].offset = offsetof(Vertex, color);
-
-                return attributeDescriptions;
-            }
-        };
-        struct Object {
-            std::vector<Vertex> vertices_ = {
-                {{+1.0f, +1.0f, 0.0f}, {1.0f, 0.0f, 0.0f}},
-                {{-1.0f, -1.0f, 0.0f}, {0.0f, 1.0f, 1.0f}},
-                {{+1.0f, -1.0f, 0.0f}, {1.0f, 0.0f, 0.0f}},
-                {{-1.0f, +1.0f, 0.0f}, {0.0f, 1.0f, 0.0f}},
-                {{+1.0f, +0.0f, 0.0f}, {1.0f, 0.0f, 1.0f}},
-                {{+0.0f, +1.0f, 0.0f}, {1.0f, 1.0f, 1.0f}},
-                {{+0.0f, +0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}},
-            };
-            std::vector<uint16_t> indices_ = {{
-                0, 6, 4, 6, 0, 5
-            }};
-            VkBuffer vertex;
-            VkDeviceMemory vertexMemory;
-            VkBuffer index;
-            VkDeviceMemory indexMemory;
-            VkImage image;
-            VkDeviceMemory imageMemory;
-            VkImageView imageView;
-            VkSampler imageSampler;
-            std::vector<VkBuffer> mvp;
-            std::vector<VkDeviceMemory> mvpMemory;
-            std::vector<VkDescriptorSet> descriptorSets;
-            struct {
-                int h, w;
-                std::shared_ptr<void> pixels;
-                VkDeviceSize size;
-            } data;
-        };   
         Vulkan() {
             printf("Created vulkan\n");
         };
@@ -107,42 +46,20 @@ class Vulkan {
         void Destroy();
         void CreateVertexBuffer(std::vector<Coords> vertices, VkBuffer& vb, VkDeviceMemory& vbm);
         void CreateIndexBuffer(std::vector<uint16_t> indices, VkBuffer& ib, VkDeviceMemory& ibm);
-        /*void CreateUniformBuffers(std::vector<VkBuffer>& ub, std::vector<VkDeviceMemory>& ubm);
-        void CreateTextureImage(std::shared_ptr<Manager::Resource::Texture::Object>& texture);
-        void CreateTextureSampler(VkSampler& s);
-        void CreateDescriptorSets(std::shared_ptr<Manager::Resource::Texture::Object>& texture);
-        void CreateCommandBuffers(std::shared_ptr<Manager::Resource::Texture::Object> obj); // temp */
-        //void CreateVertexBuffer();
-        //void CreateIndexBuffer();
         void CreateUniformBuffers(std::vector<VkBuffer>& mvp, std::vector<VkDeviceMemory>& mvpMemory);
         void UpdateUniformBuffer(UniformBufferObject mvp, std::vector<VkDeviceMemory>& mvpBufferMemory);
+
         void CreateDescriptorPool();
-        //void CreateDescriptorSets(std::shared_ptr<Object>& obj);
         void CreateDescriptorSets(std::vector<VkDescriptorSet>& ds, std::vector<VkBuffer>& mvpBuffer, VkImageView& imageView, VkSampler& imageSampler);
-        //void CreateTextureImage(std::shared_ptr<Object>& texture);
+
         void CreateTextureImage(VkImage& image, VkDeviceMemory& imageMemory, std::shared_ptr<void> pixels, VkDeviceSize size, int height, int width);
         void CreateTextureImageView(VkImage& image, VkImageView& imageView);
         void CreateTextureSampler(VkSampler& imageSampler);
+
         void CreateCommandBuffers(bool init); // temp
-        void StartSecondaryCommandBuffer(uint32_t size);
-        //void AddToSecondaryCommandBuffer(std::shared_ptr<Object>& obj, unsigned int i);
+        void StartSecondaryCommandBuffer(uint32_t size);        
         void AddToSecondaryCommandBuffer(VkBuffer vb, VkBuffer ib, uint32_t iSize, std::vector<VkDescriptorSet>& ds, unsigned int objCount);
         void EndSecondaryCommandBuffer();
-        //void CreateSecondaryCommandBuffer(std::vector<Component::Graphic> obj);
-
-        VkCommandPool commandPool;
-
-        VkBuffer vertexBuffer;
-        VkDeviceMemory vertexBufferMemory;
-        VkBuffer indexBuffer;
-        VkDeviceMemory indexBufferMemory;
-
-        std::vector<VkBuffer> uniformBuffers;
-        std::vector<VkDeviceMemory> uniformBuffersMemory;
-        VkDescriptorPool descriptorPool;
-        std::vector<VkDescriptorSet> descriptorSets;
-
-        void DrawFrame(); // Temp
 
         uint32_t StartFrame();
         void EndFrame();
@@ -152,7 +69,6 @@ class Vulkan {
         void SetWindowSize(uint32_t width, uint32_t height);
         void DestroyBuffer(VkBuffer& buffer, VkDeviceMemory& bufferMemory);
         void DestroyBufferArray(std::vector<VkBuffer>& buffer, std::vector<VkDeviceMemory>& bufferMemory);
-        //void DestroyTexture(std::shared_ptr<Object>& texture);
         void DestroyTexture(VkImage& image, VkDeviceMemory& imageMemory, VkImageView& imageView, VkSampler& imageSampler);
 
     private:
@@ -199,9 +115,6 @@ class Vulkan {
         void CreateFramebuffers();
         void CreateSyncObjects();
         void CreateCommandPool();
-        
-        std::vector<VkCommandBuffer>& GetCommandBuffer();
-//        void CreateCommandBuffers();
 
         // Vulkan_utils.cpp
         bool CheckValidationLayerSupport();
@@ -239,7 +152,7 @@ class Vulkan {
         const std::vector<const char*> deviceExtensions_ = {
             VK_KHR_SWAPCHAIN_EXTENSION_NAME
         };
-        VkSampleCountFlagBits msaaSamples_ = VK_SAMPLE_COUNT_1_BIT;
+        
         VkQueue graphicsQueue_;
         VkQueue presentQueue_;
         // Swapchain
@@ -255,9 +168,9 @@ class Vulkan {
         VkCommandPool commandPool_;
         std::vector<VkCommandBuffer> primaryCommandBuffers_;
         std::vector<std::vector<VkCommandBuffer>> secondaryCommandBuffers_;
-
-        // DescriptorSetLayout
-        VkDescriptorSetLayout descriptorSetLayout;
+        // Descriptor
+        VkDescriptorPool descriptorPool_;
+        VkDescriptorSetLayout descriptorSetLayout_;
         // Pipeline
         VkPipelineLayout pipelineLayout_;
         VkPipeline graphicsPipeline_;
@@ -266,6 +179,7 @@ class Vulkan {
         VkDeviceMemory depthImageMemory;
         VkImageView depthImageView;
         // MSAA
+        VkSampleCountFlagBits msaaSamples_ = VK_SAMPLE_COUNT_1_BIT;
         VkImage colorImage_;
         VkDeviceMemory colorImageMemory_;
         VkImageView colorImageView_;

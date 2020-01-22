@@ -34,7 +34,8 @@ SDL_Window* Window::window_ = nullptr;
 bool Window::done_ = false;
 
 void Window::Initialize() {
-    SDL_Init(SDL_INIT_VIDEO);
+    int bb = SDL_Init(SDL_INIT_VIDEO);
+    printf("SDL: %i\n", bb);
     window_ = SDL_CreateWindow("Vulkan", 0, 0, WIDTH, HEIGHT, SDL_WINDOW_VULKAN | SDL_WINDOW_RESIZABLE);
     if (window_ == NULL) {
         throw std::runtime_error("Could not create SDL window");
@@ -76,7 +77,7 @@ void Window::HandleWindowEvent(SDL_WindowEvent window) {
     switch(window.event) {
         case SDL_WINDOWEVENT_SIZE_CHANGED:   
             Core::Unique<Core::Vulkan>::GetInstance().SetWindowSize(window.data1, window.data2);
-            Core::Unique<System::Camera>::GetInstance().SetAspectRatio((float)(window.data1 / window.data2));
+            Core::Unique<System::Camera>::GetInstance().SetResolution(window.data1, window.data2);
             break;
         case SDL_WINDOWEVENT_MINIMIZED:
             break;

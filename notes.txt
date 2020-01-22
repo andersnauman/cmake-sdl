@@ -1,0 +1,17 @@
+sdl -> windows -> system/camera and core/vulkan
+sdl -> input -> system/input
+
+# Systems
+render -> get all live objects -> add to vulkan
+input -> get all player objects -> 
+
+
+## TODO
+- commandbuffers cannot update while "pending". must check that each buffer is not in use.
+This is not good enough:
+
+if(currentImageIndex_ != i) {
+    continue;
+}
+
+- do not re-create commandbuffer if nothing have changed. neither primary or secondary.

@@ -22,7 +22,7 @@ int main(int argc, char *argv[]) {
     // 1
     unsigned int id = Core::Unique<Manager::Entity>::GetInstance().Add();
     Core::Unique<Manager::Component<Component::Position>>::GetInstance().Add(id);
-    Core::Unique<Manager::Component<Component::Position>>::GetInstance().Get(id).Set(glm::vec3(0.0f, -10.0f, -20.0f));
+    Core::Unique<Manager::Component<Component::Position>>::GetInstance().Get(id).Set(glm::vec3(0.0f, -10.0f, 20.0f));
     Core::Unique<Manager::Component<Component::Graphic>>::GetInstance().Add(id);
     Core::Unique<Manager::Component<Component::PlayerControlled>>::GetInstance().Add(id);
     // 2

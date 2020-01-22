@@ -47,7 +47,7 @@ void Vulkan::RecreateSwapChain() {
     CreateColorResources();
     CreateDepthResources();    
     CreateFramebuffers();
-    //CreateCommandBuffers();
+    CreateCommandBuffers(true);
 }
 
 void Vulkan::Destroy() {
@@ -55,8 +55,8 @@ void Vulkan::Destroy() {
     vkDeviceWaitIdle(device_);
     DestroySwapChain();
 
-    vkDestroyDescriptorPool(device_, descriptorPool, nullptr);
-    vkDestroyDescriptorSetLayout(device_, descriptorSetLayout, nullptr);
+    vkDestroyDescriptorPool(device_, descriptorPool_, nullptr);
+    vkDestroyDescriptorSetLayout(device_, descriptorSetLayout_, nullptr);
 
     // Sync
     for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
@@ -376,7 +376,7 @@ void Vulkan::CreateDescriptorSetLayout() {
     layoutInfo.bindingCount = static_cast<uint32_t>(bindings.size());
     layoutInfo.pBindings = bindings.data();
 
-    if (vkCreateDescriptorSetLayout(device_, &layoutInfo, nullptr, &descriptorSetLayout) != VK_SUCCESS) {
+    if (vkCreateDescriptorSetLayout(device_, &layoutInfo, nullptr, &descriptorSetLayout_) != VK_SUCCESS) {
         throw std::runtime_error("failed to create descriptor set layout!");
     }
 }
@@ -492,7 +492,7 @@ void Vulkan::CreateGraphicsPipeline() {
     VkPipelineLayoutCreateInfo pipelineLayoutInfo = {};
     pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
     pipelineLayoutInfo.setLayoutCount = 1;
-    pipelineLayoutInfo.pSetLayouts = &descriptorSetLayout;
+    pipelineLayoutInfo.pSetLayouts = &descriptorSetLayout_;
 
     if (vkCreatePipelineLayout(device_, &pipelineLayoutInfo, nullptr, &pipelineLayout_) != VK_SUCCESS) {
         throw std::runtime_error("failed to create pipeline layout!");
@@ -591,6 +591,10 @@ void Vulkan::CreateCommandBuffers(bool init) {
     }
 
     for (size_t i = 0; i < primaryCommandBuffers_.size(); i++) {
+        if(currentImageIndex_ != i) {
+            continue;
+        }
+        
         VkCommandBufferBeginInfo beginInfo = {};
         beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
         beginInfo.flags = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT;
@@ -614,7 +618,7 @@ void Vulkan::CreateCommandBuffers(bool init) {
         renderPassInfo.pClearValues = clearValues.data();
 
         vkCmdBeginRenderPass(primaryCommandBuffers_[i], &renderPassInfo, VK_SUBPASS_CONTENTS_SECONDARY_COMMAND_BUFFERS);
-            if (!init) {
+            if (!init && secondaryCommandBuffers_.at(i).size() > 0) { // do not need this init?
                 vkCmdExecuteCommands(primaryCommandBuffers_[i], (uint32_t)secondaryCommandBuffers_.at(i).size(), secondaryCommandBuffers_.at(i).data());
             }
         vkCmdEndRenderPass(primaryCommandBuffers_[i]);
@@ -633,6 +637,11 @@ void Vulkan::StartSecondaryCommandBuffer(uint32_t size) {
 
     secondaryCommandBuffers_.resize(swapChainFramebuffers_.size());
     for (size_t i = 0; i < secondaryCommandBuffers_.size(); i++) {
+        if(currentImageIndex_ != i) {
+            continue;
+        }
+        
+        vkFreeCommandBuffers(device_, commandPool_, secondaryCommandBuffers_.at(i).size(), secondaryCommandBuffers_.at(i).data());
         secondaryCommandBuffers_.at(i).clear();
         secondaryCommandBuffers_.at(i).resize(size);
         if (vkAllocateCommandBuffers(device_, &allocInfo, secondaryCommandBuffers_.at(i).data()) != VK_SUCCESS) {
@@ -653,6 +662,9 @@ void Vulkan::AddToSecondaryCommandBuffer(VkBuffer vb, VkBuffer ib, uint32_t iSiz
     beginInfo.pInheritanceInfo = &inheritanceInfo;
 
     for (size_t i = 0; i < secondaryCommandBuffers_.size(); i++) {
+        if(currentImageIndex_ != i) {
+            continue;
+        }
         if (vkBeginCommandBuffer(secondaryCommandBuffers_.at(i).at(objCount), &beginInfo) != VK_SUCCESS) {
             throw std::runtime_error("Vulkan: Could not begin command buffer");
         }
@@ -686,17 +698,17 @@ void Vulkan::CreateDescriptorPool() {
     poolInfo.pPoolSizes = poolSizes.data();
     poolInfo.maxSets = static_cast<uint32_t>(swapChainImages_.size() * 5);
 
-    if (vkCreateDescriptorPool(device_, &poolInfo, nullptr, &descriptorPool) != VK_SUCCESS) {
+    if (vkCreateDescriptorPool(device_, &poolInfo, nullptr, &descriptorPool_) != VK_SUCCESS) {
         throw std::runtime_error("failed to create descriptor pool!");
     }
 }
 
 //void Vulkan::CreateDescriptorSets(std::shared_ptr<Object>& obj) {
 void Vulkan::CreateDescriptorSets(std::vector<VkDescriptorSet>& ds, std::vector<VkBuffer>& mvpBuffer, VkImageView& imageView, VkSampler& imageSampler) {
-    std::vector<VkDescriptorSetLayout> layouts(swapChainImages_.size(), descriptorSetLayout);
+    std::vector<VkDescriptorSetLayout> layouts(swapChainImages_.size(), descriptorSetLayout_);
     VkDescriptorSetAllocateInfo allocInfo = {};
     allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-    allocInfo.descriptorPool = descriptorPool;
+    allocInfo.descriptorPool = descriptorPool_;
     allocInfo.descriptorSetCount = static_cast<uint32_t>(swapChainImages_.size());
     allocInfo.pSetLayouts = layouts.data();
 
@@ -882,7 +894,6 @@ void Vulkan::CreateUniformBuffers(std::vector<VkBuffer>& mvp, std::vector<VkDevi
     }
 }
 void Vulkan::CreateTextureImage(VkImage& image, VkDeviceMemory& imageMemory, std::shared_ptr<void> pixels, VkDeviceSize size, int height, int width) {
-//void Vulkan::CreateTextureImage(std::shared_ptr<Object>& texture) {
     VkBuffer stagingBuffer;
     VkDeviceMemory stagingBufferMemory;
     CreateBuffer(size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);
