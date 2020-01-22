@@ -32,6 +32,11 @@ dnf install mingw64-zlib
 cmake -DCMAKE_TOOLCHAIN_FILE=../windows-toolchain.cmake ..
 make
 make install
+
+# Windows
+cmake ..
+cmake --build .
+cmake --install . --prefix install --config Debug
 ```
 
 ## Notes

@@ -16,6 +16,11 @@
 #include <SDL2/SDL_vulkan.h>
 #endif // __LINUX__
 
+#ifdef _WIN32
+#include <SDL.h>
+#include <SDL_vulkan.h>
+#endif // _WIN32
+
 namespace Core {
 class Window {
     public:

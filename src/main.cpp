@@ -12,7 +12,7 @@
 #include "System/Input.hpp"
 #include "System/Render.hpp"
 
-int main() {
+int main(int argc, char *argv[]) {
     // Load Window(SDL) and Vulkan
     Core::Unique<Core::Window>::GetInstance().Initialize();
     Core::Unique<Core::Vulkan>::GetInstance().SetInstanceExtensions(Core::Unique<Core::Window>::GetInstance().GetInstanceExtensions());

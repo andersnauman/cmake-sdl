@@ -12,6 +12,10 @@
 #include <SDL2/SDL_image.h>
 #endif // __LINUX__
 
+#ifdef _WIN32
+#include <SDL_image.h>
+#endif // _WIN32
+
 // Local headers
 #include "Core/Unique.hpp"
 #include "Core/Vulkan.hpp"
@@ -28,7 +32,7 @@ void Texture::Load(ObjectID id) {
     std::string path;
     switch (id) {
         case Statue:
-            path = "../src/Resource/Texture/statue.png";
+            path = "Resources/statue.png";
             break;
     };
 

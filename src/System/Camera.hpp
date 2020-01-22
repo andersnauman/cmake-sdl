@@ -18,7 +18,6 @@ class Camera {
             glm::vec3 cameraUp    = glm::vec3(0.0f, -1.0f,  0.0f);
             view_ = glm::lookAt(cameraPos, cameraFront, cameraUp);
             project_ = glm::perspective(fov_, aspect_, near_, far_);
-            //project_[1][1] *= -1;
         };
         void SetViewPosition(glm::vec3 pos);
         //void SetFOV(float fov);

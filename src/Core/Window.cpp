@@ -14,6 +14,12 @@
 #include <SDL2/SDL_vulkan.h>
 #endif // __LINUX__
 
+#ifdef _WIN32
+#include <SDL.h>
+#include <SDL_image.h>
+#include <SDL_vulkan.h>
+#endif
+
 #include <glm/glm.hpp>
 
 #include "Core/Unique.hpp"
@@ -70,7 +76,7 @@ void Window::HandleWindowEvent(SDL_WindowEvent window) {
     switch(window.event) {
         case SDL_WINDOWEVENT_SIZE_CHANGED:   
             Core::Unique<Core::Vulkan>::GetInstance().SetWindowSize(window.data1, window.data2);
-            Core::Unique<System::Camera>::GetInstance().SetAspectRatio(window.data1 / window.data2);
+            Core::Unique<System::Camera>::GetInstance().SetAspectRatio((float)(window.data1 / window.data2));
             break;
         case SDL_WINDOWEVENT_MINIMIZED:
             break;

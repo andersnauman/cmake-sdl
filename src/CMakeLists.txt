@@ -31,11 +31,25 @@ add_executable(${PROJECT_NAME}
 )
 target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_17)
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-find_package(glm REQUIRED)
-if (glm_FOUND)
-    target_include_directories(${PROJECT_NAME} PRIVATE ${GLM_INCLUDE_DIRS})
-endif()
+
+# Resources
+set(RESOURCES
+    "Resource/Texture/statue.png"
+    "Shader/frag.spv"
+    "Shader/vert.spv"
+)
+
 # Dependencies
+## GLM
+if(TARGET glm::glm)
+    target_link_libraries(${PROJECT_NAME} PRIVATE glm::glm)
+elseif()
+    find_package(glm REQUIRED)
+    if (glm_FOUND)
+        target_include_directories(${PROJECT_NAME} PRIVATE ${GLM_INCLUDE_DIRS})
+    endif()
+endif()
+
 ## Vulkan
 if(NOT APPLE)
     if(NOT (TARGET Vulkan::Headers AND TARGET Vulkan::Vulkan))
@@ -99,3 +113,11 @@ if(APPLE)
             ${INSTALL_LIBRARY_DIR}
     )
 endif()
+
+## Resources
+install(
+    FILES
+        ${RESOURCES}
+    DESTINATION
+        ${INSTALL_RUNTIME_DIR}/Resources
+)

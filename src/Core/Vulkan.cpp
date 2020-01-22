@@ -382,8 +382,8 @@ void Vulkan::CreateDescriptorSetLayout() {
 }
 
 void Vulkan::CreateGraphicsPipeline() {
-    auto vertShaderCode = ReadFile("../src/Shader/vert.spv");
-    auto fragShaderCode = ReadFile("../src/Shader/frag.spv");
+    auto vertShaderCode = ReadFile("Resources/vert.spv");
+    auto fragShaderCode = ReadFile("Resources/frag.spv");
 
     VkShaderModule vertShaderModule = CreateShaderModule(vertShaderCode);
     VkShaderModule fragShaderModule = CreateShaderModule(fragShaderCode);
